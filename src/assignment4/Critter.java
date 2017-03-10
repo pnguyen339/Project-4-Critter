@@ -13,6 +13,8 @@ package assignment4;
  */
 
 
+import java.lang.reflect.Constructor;
+import java.util.ArrayList;
 import java.util.List;
 
 /* see the PDF for descriptions of the methods and fields in this class
@@ -66,7 +68,7 @@ public abstract class Critter {
 					this.y_coord = Params.world_height - numMove;
 				break;
 
-			case 2;
+			case 2:
 				this.y_coord = (this.y_coord - numMove);
 				if(this.y_coord < 0)
 					this.y_coord = Params.world_height - numMove;
@@ -87,14 +89,14 @@ public abstract class Critter {
 					this.x_coord = Params.world_width - numMove;
 				break;
 
-			case 5;
+			case 5:
 				this.x_coord = (this.x_coord - numMove);
 				if(this.x_coord < 0)
 					this.x_coord = Params.world_width - numMove;
 				this.y_coord = (this.y_coord + numMove)%Params.world_height;
 				break;
 
-			case 6;
+			case 6:
 				this.y_coord = (this.y_coord + numMove)%Params.world_height;
 				break;
 
@@ -140,19 +142,24 @@ public abstract class Critter {
 
 		try {
 			myCritter = Class.forName(critter_class_name); 	// Class object of specified name
-		} catch (ClassNotFoundException e) {
+		}
+		catch (ClassNotFoundException e) {
 			throw new InvalidCritterException(critter_class_name);
 		}
+		
+		
 		try {
-			constructor = myCritter.getConstructor();		// No-parameter constructor object
+			constructor = myCritter.getConstructor();			// No-parameter constructor object
 			instanceOfMyCritter = constructor.newInstance();	// Create new object using constructor
-		} catch ( // various exceptions ) {
+			/* TODO add instanceOfMyCritter to list of Critters */
+			
+		} catch ( Exception e /* various exceptions*/ ) {
 			// Do whatever is needed to handle the various exceptions here -- e.g. rethrow Exception
 
 		}
-		Critter me = (Critter)instanceOfMyCritter;		// Cast to Critter
+		//Critter me = (Critter)instanceOfMyCritter;		// Cast to Critter	// method is void, don't return
 
-		return me;
+		//return me;
 	}
 	
 	/**

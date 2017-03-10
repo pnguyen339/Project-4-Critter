@@ -1,16 +1,5 @@
 package assignment4;
-/* CRITTERS Main.java
- * EE422C Project 4 submission by
- * Replace <...> with your actual data.
- * <Student1 Name>
- * <Student1 EID>
- * <Student1 5-digit Unique No.>
- * <Student2 Name>
- * <Student2 EID>
- * <Student2 5-digit Unique No.>
- * Slip days used: <0>
- * Fall 2016
- */
+
 
 import java.util.Scanner;
 import java.io.*;
@@ -70,10 +59,85 @@ public class Main {
         /* Do not alter the code above for your submission. */
         /* Write your code below. */
         
-        // System.out.println("GLHF");
-        
-        /* Write your code above */
+        runController(kb);		// why is inputfile even a variable in instance scope? it's used literally twice
+        // for that matter, what about old? It's pretty obvious -- it can't even take useful assignment!
+        // and testOutputString? Again, used literally twice and nowhere else!
+        // it's like the provided code is purposely ridiculous...
+
         System.out.flush();
 
     }
+
+	private static void runController(Scanner keyboard) {
+		String line = null;
+		Scanner input = null;
+		
+		while (true) {		// loop until exit
+			try {
+				line = keyboard.nextLine();
+				input = new Scanner(line);
+				
+				String crittertype;
+				int optionalnumber;
+				
+				
+				switch (input.next()) {
+					case "quit":
+						return;
+						
+					case "show":
+						if (input.hasNext()) throw new Exception(); 
+						Critter.displayWorld();
+						break;
+						
+					case "step":
+						optionalnumber = 1;
+						if (input.hasNextInt()) optionalnumber = input.nextInt();
+						if (input.hasNext()) throw new Exception();
+						
+						for (int i = 0; i < optionalnumber; i++) {
+							// doTimeStep();	// TODO
+						}
+						break;
+						
+					case "seed":
+						long seed = input.nextLong();
+						if (input.hasNext()) throw new Exception();
+						Critter.setSeed(seed);
+						break;
+						
+					case "make":
+						crittertype = input.next();
+						optionalnumber = 1;
+						if (input.hasNextInt()) optionalnumber = input.nextInt();
+						if (input.hasNext()) throw new Exception();
+						
+						for (int i = 0; i < optionalnumber; i++) {
+							Critter.makeCritter(crittertype);
+						}
+						
+						break;
+						
+					case "stats":
+						crittertype = input.next();
+						if (input.hasNext()) throw new Exception();
+						
+						// TODO everything
+						break;
+						
+					default:
+						System.out.println("invalid command: " + line);
+						break;
+				}
+				
+			}
+			catch (Exception e) {
+				System.out.println("error processing: " + line);
+				
+			}
+			finally {
+				input.close();
+			}
+		}
+	}
 }
