@@ -14,6 +14,8 @@ package assignment4;
 
 
 import java.util.List;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 /* see the PDF for descriptions of the methods and fields in this class
  * you may add fields, methods or inner classes to Critter ONLY if you make your additions private
@@ -26,8 +28,9 @@ public abstract class Critter {
 	private	static List<Critter> population = new java.util.ArrayList<Critter>();
 	private static List<Critter> babies = new java.util.ArrayList<Critter>();
 	//protected static ArrayList<ArrayList<Critter>> location = new ArrayList<ArrayList<Critter>>();
-	protected static HashMap<int[2], ArrayList<Critter>> world = new HashMap<Vector, ArrayList<Critter>>();
-	private boolean move;
+	protected static HashMap<int[], ArrayList<Critter>> world = new HashMap<int[], ArrayList<Critter>>();
+	
+	private boolean moved;
 	private static boolean fightTime = false;
 	// Gets the package name.  This assumes that Critter and its subclasses are all in the same package.
 	static {
@@ -53,173 +56,165 @@ public abstract class Critter {
 	private int x_coord;
 	private int y_coord;
 	
+	private static int[] offsetOf(int direction) {
+		switch(direction) {
+			case 0: 
+				return new int[] {1, 0};
+		
+			case 1:
+				return new int[] {1, -1};
+
+			case 2:
+				return new int[] {0, -1};
+
+			case 3:
+				return new int[] {-1, -1};
+
+			case 4:
+				return new int[] {-1, 0};
+
+			case 5:
+				return new int[] {-1, 1};
+
+			case 6:
+				return new int[] {0, 1};
+
+			case 7:
+				return new int[] {1, 1};
+			
+			default:
+				return new int[] {0, 0};
+		}
+	}
 	
 	private final void move(int direction, int numMove) {
 		 
-		int[2] posOrig = {this.x_coord, this.y_coord}; //remove the critter from its current position on the Map
+		int[] posOrig = {this.x_coord, this.y_coord};	// remember current position
 		
+		int[] offset = offsetOf(direction);				// find where the critter goes, in both x and y
+		this.x_coord = (this.x_coord + (numMove * offset[0])) % Params.world_width;
+		while (this.x_coord < 0)
+			x_coord += Params.world_width;
 		
-		switch(direction) {
-			case 0: 
-				this.x_coord = (this.x_coord + numMove)%Params.world_width;
-				break;
-			
-			case 1:
-				this.x_coord = (this.x_coord + numMove)%Params.world_width;
-				this.y_coord = (this.y_coord - numMove);
-				while(this.y_coord < 0)
-					this.y_coord += Params.world_height;
-				break;
-
-			case 2:
-				this.y_coord = (this.y_coord - numMove);
-				while(this.y_coord < 0)
-					this.y_coord += Params.world_height;
-				break;
-
-			case 3:
-				this.x_coord = (this.x_coord - numMove);
-				while(this.x_coord < 0)
-					this.x_coord += Params.world_width;
-				this.y_coord = (this.y_coord - numMove);
-				while(this.y_coord < 0)
-					this.y_coord += Params.world_height;
-				break;
-
-			case 4:
-				this.x_coord = (this.x_coord - numMove);
-				while(this.x_coord < 0)
-					this.x_coord += Params.world_width;
-				break;
-
-			case 5:
-				this.x_coord = (this.x_coord - numMove);
-				while(this.x_coord < 0)
-					this.x_coord += Params.world_width;
-				this.y_coord = (this.y_coord + numMove)%Params.world_height;
-				break;
-
-			case 6:
-				this.y_coord = (this.y_coord + numMove)%Params.world_height;
-				break;
-
-			case 7:
-				this.x_coord = (this.x_coord + numMove)%Params.world_width;
-				this.y_coord = (this.y_coord + numMove)%Params.world_height;
-				break;
-		}
+		this.y_coord = (this.y_coord + (numMove * offset[1])) % Params.world_height;
+		while (this.y_coord < 0)
+			y_coord += Params.world_height;
 		
-		if(fightTime) {
-			int[2] posNew = {this.x_coord, this.y_coord};
-			if(!world.containsKey(posNew)) {
+		if(fightTime) {									// avoid collisions if in fight stage
+			int[] posNew = {this.x_coord, this.y_coord};
+			if(world.get(posNew).size() > 0) {
 				this.x_coord = posOrig[0];
 				this.y_coord = posOrig[1];
 				return;
 			}
 		}
 
-		if(world.get(posOrig).size() == 1) {
+		if(world.get(posOrig).size() == 1) {			// if move is successful, remove from old place
 			world.remove(posOrig);
 		}
 		else {
-			
-			int i =world.get(posOrig).indexOf(this);
-			world.get(posOrig).remove(i);
+			world.get(posOrig).remove(this);
 		}
-		this.posUpdate();
+		
+		insertWorld(this);								// add to new place
 		
 	}
 	
-	private final int battle(Critter opponent) {
-		boolean fighter0 = this.fight(opponent.toString());
-		boolean fighter1 = opponent.fight(this.toString());
-		if(this.x_coord == opponent.x_coord  && this.y_coord == opponent.y_coord) {
-			
-			int attack0 = 0;
-			if (fighter0) 
-				attack0 = Critter.getRandomInt(this.getEnergy());
-			
+	private final static void battle(Critter fighter1, Critter fighter2) {
+		boolean fights1 = fighter1.fight(fighter2.toString());
+		boolean fights2 = fighter2.fight(fighter1.toString());
+		
+		if(fighter1.x_coord == fighter2.x_coord  && fighter1.y_coord == fighter2.y_coord) {
 			int attack1 = 0;
-			if(fighter1) 
-				attack1 = Critter.getRandomInt(opponent.getEnergy());
+			if (fights1) 
+				attack1 = Critter.getRandomInt(fighter1.energy);
 			
-			if(attack0 > attack1)
-				this.energy += opponent.energy/2;
-				return 1;
-			else
-				opponent.energy += this.energy/2;
-				return 0;
+			int attack2 = 0;
+			if(fights2) 
+				attack2 = Critter.getRandomInt(fighter2.energy);
+
+			if(attack1 < attack2) {
+				fighter2.energy += fighter1.energy / 2;
+				killCritter(fighter1);
+			}
+			else {
+				fighter1.energy += fighter2.energy / 2;
+				killCritter(fighter2);
+			}
 		}
 	}
 	
 
-	private final void fightCheck() {
-			for(int[2] loc: world.keySet()) {
-				ArrayList<Critter> fighter = world.get(loc);
-				while(fighter.size() > 1) {
-					int dead = fighter.get(0).battle(fighter.get(1));
-					fighter.remove(dead);
+	private final static void fightCheck() {
+			for(int[] loc : world.keySet()) {
+				ArrayList<Critter> fighters = world.get(loc);
+				while(fighters.size() > 1) {
+					battle(fighters.get(0), fighters.get(1));
 				}
 			}
 	}
-
-	private final void posUpdate() { //update the Map with the critter new position
-		int[2] pos = { this.x_coord, this.y_coord};
-		ArrayList<Critter> crit;
-
-		if(world.containsKey(pos)) {
-			crit = world.getKey(pos);
-			crit.add(me);
-		}
-		else {
-			crit = new ArrayList<Critter>();
-			crit.add(me);
-			world.put(pos, crit);
-		}
+	
+	private static void killCritter(Critter ded) {
+		population.remove(ded);
+		world.get(new int[] {ded.x_coord, ded.y_coord}).remove(ded);
 	}
+	
 
 	protected final void walk(int direction) {
-		if(!this.move) {
+		if(!this.moved) {
 			
 			this.move(direction, 1);
 			this.energy -= Params.walk_energy_cost;
-			this.move = true;
+			this.moved = true;
+		}
+		
+		if (this.energy <= 0) {
+			killCritter(this);
 		}
 	}
 	
 	protected final void run(int direction) {
-		if(!this.move) {
+		if(!this.moved) {
 			
 			this.move(direction, 2);
 			this.energy -= Params.run_energy_cost;
-			this.move = true;
+			this.moved = true;
+		}		
+		
+		if (this.energy <= 0) {
+			killCritter(this);
 		}
 	}
 	
-	private final void insertWorld(Critter critt) {
-		int[2] loc = {critt.x_coord, critt.y_coord};
+	private final static void insertWorld(Critter critt) {
+		int[] loc = {critt.x_coord, critt.y_coord};
 		ArrayList<Critter> crit;
 
 		if(world.containsKey(loc)) {
-			crit = world.getKey(loc);
+			crit = world.get(loc);
 			crit.add(critt);
 		}
 		else {
 			crit = new ArrayList<Critter>();
 			world.put(loc, crit);
 		}
-
 	}
 
 	protected final void reproduce(Critter offspring, int direction) {
-		Constructor<?> constructor = this.getConstructor();
-		Object instanceOfOffspring = constructor.newInstance();
+		offspring.x_coord = this.x_coord;
+		offspring.y_coord = this.y_coord;
 		
-		offspring = (Critter) instanceOfOffspring;
-		offspring.x_coord = Critter.getRandomInt(Params.world_width);
-		offspring.y_coord = Critter.getRandomInt(Params.world_height);
+		int[] offset = offsetOf(direction);
+		offspring.x_coord = (offspring.x_coord + offset[0]) % Params.world_width;
+		while (offspring.x_coord < 0)
+			x_coord += Params.world_width;
+		
+		offspring.y_coord = (offspring.y_coord + offset[1]) % Params.world_height;
+		while (offspring.y_coord < 0)
+			y_coord += Params.world_height;
+		
 		offspring.energy = this.energy/2;
-		offspring.move = false;
+		offspring.moved = false;
 		
 		this.energy -= offspring.energy;
 		
@@ -238,8 +233,12 @@ public abstract class Critter {
 	 * an Exception.)
 	 * @param critter_class_name
 	 * @throws InvalidCritterException
+	 * @throws InvocationTargetException 
+	 * @throws IllegalArgumentException 
+	 * @throws IllegalAccessException 
+	 * @throws InstantiationException 
 	 */
-	public static void makeCritter(String critter_class_name) throws InvalidCritterException {
+	public static void makeCritter(String critter_class_name) throws InvalidCritterException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
 		Class<?> myCritter = null;
 		Constructor<?> constructor = null;
 		Object instanceOfMyCritter = null;
@@ -256,13 +255,13 @@ public abstract class Critter {
 			throw new InvalidCritterException(critter_class_name);
 
 		}
+		
 		Critter me = (Critter)instanceOfMyCritter;		// Cast to Critter
 		me.x_coord = Critter.getRandomInt(Params.world_width);
 		me.y_coord = Critter.getRandomInt(Params.world_height);
 		me.energy = Params.start_energy;	
-		me.move = false;
+		me.moved = false;
 		insertWorld(me);
-		
 	}
 	
 	/**
@@ -273,7 +272,7 @@ public abstract class Critter {
 	 */
 	public static List<Critter> getInstances(String critter_class_name) throws InvalidCritterException {
 		List<Critter> result = new java.util.ArrayList<Critter>();
-	
+		/* TODO */
 		return result;
 	}
 	
@@ -357,25 +356,23 @@ public abstract class Critter {
 	 * Clear the world of all critters, dead and alive
 	 */
 	public static void clearWorld() {
-		world.clear();		
-
+		world.clear();
 	}
 	
 	private static void resetMove() {
 		for(Critter each: population){
-			each.move = false;
+			each.moved = false;
 		}
-
-		fightTime =false;
 	}
 	
 	public static void worldTimeStep() {
 		for(Critter each: population){
 			each.doTimeStep();
 		}
-		fightTime = true;
 		
+		fightTime = true;
 		fightCheck();
+		fightTime = false;
 
 		for(Critter each: population){
 			each.energy -= Params.rest_energy_cost;
@@ -390,10 +387,31 @@ public abstract class Critter {
 		babies.clear();
 
 		resetMove();
-
 	}
 	
-	public static void displayWorld() {
+	private static void generateAlgae() {
+		// TODO Auto-generated method stub
 		
+	}
+
+	public static void displayWorld() {
+		String head = "+";									// build the head, +---+
+		for (int i = 0; i < Params.world_width; i++) {
+			head = head + "-";
+		}
+		head = head + "+";
+		
+		System.out.println(head);							// print the head
+		for (int y = 0; y < Params.world_height; y++) {
+			System.out.print("|");							// print the vertical lines, then the row contents
+			for (int x = 0; x < Params.world_width; x++) {
+				ArrayList<Critter> critters = world.get(new int[] {x, y});
+				
+				if (critters != null && critters.size() > 0) 
+					System.out.print(critters.get(0).toString());
+			}
+			System.out.println("|");						// print the ending vertical line, and newline
+		}
+		System.out.println(head);							// end by printing the head again
 	}
 }
