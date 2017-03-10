@@ -25,7 +25,9 @@ public abstract class Critter {
 	private static String myPackage;
 	private	static List<Critter> population = new java.util.ArrayList<Critter>();
 	private static List<Critter> babies = new java.util.ArrayList<Critter>();
+	private static ArrayList<ArrayList<Critter>> location = new ArrayList<ArrayList<Critter>>();
 
+	
 	// Gets the package name.  This assumes that Critter and its subclasses are all in the same package.
 	static {
 		myPackage = Critter.class.getPackage().toString().split(" ")[1];
@@ -53,7 +55,7 @@ public abstract class Critter {
 	protected final void walk(int direction) {
 	}
 	
-	protected final void run(int direction) {
+	protected final void run(int direction) {:wq
 		
 	}
 	
@@ -74,7 +76,25 @@ public abstract class Critter {
 	 * @throws InvalidCritterException
 	 */
 	public static void makeCritter(String critter_class_name) throws InvalidCritterException {
-			
+		Class<?> myCritter = null;
+		Constructor<?> constructor = null;
+		Object instanceOfMyCritter = null;
+
+		try {
+			myCritter = Class.forName(critter_class_name); 	// Class object of specified name
+		} catch (ClassNotFoundException e) {
+			throw new InvalidCritterException(critter_class_name);
+		}
+		try {
+			constructor = myCritter.getConstructor();		// No-parameter constructor object
+			instanceOfMyCritter = constructor.newInstance();	// Create new object using constructor
+		} catch ( // various exceptions ) {
+			// Do whatever is needed to handle the various exceptions here -- e.g. rethrow Exception
+
+		}
+		Critter me = (Critter)instanceOfMyCritter;		// Cast to Critter
+
+		return me;
 	}
 	
 	/**
