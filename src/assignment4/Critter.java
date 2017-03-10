@@ -25,9 +25,9 @@ public abstract class Critter {
 	private static String myPackage;
 	private	static List<Critter> population = new java.util.ArrayList<Critter>();
 	private static List<Critter> babies = new java.util.ArrayList<Critter>();
-	private static ArrayList<ArrayList<Critter>> location = new ArrayList<ArrayList<Critter>>();
+	protected static ArrayList<ArrayList<Critter>> location = new ArrayList<ArrayList<Critter>>();
 
-	
+
 	// Gets the package name.  This assumes that Critter and its subclasses are all in the same package.
 	static {
 		myPackage = Critter.class.getPackage().toString().split(" ")[1];
@@ -52,10 +52,68 @@ public abstract class Critter {
 	private int x_coord;
 	private int y_coord;
 	
+	
+	private final void move(int direction, int numMove) {
+		switch(direction) {
+			case 0: 
+				this.x_coord = (this.x_coord + numMove)%Params.world_width;
+				break;
+			
+			case 1:
+				this.x_coord = (this.x_coord + numMove)%Params.world_width;
+				this.y_coord = (this.y_coord - numMove);
+				if(this.y_coord < 0)
+					this.y_coord = Params.world_height - numMove;
+				break;
+
+			case 2;
+				this.y_coord = (this.y_coord - numMove);
+				if(this.y_coord < 0)
+					this.y_coord = Params.world_height - numMove;
+				break;
+
+			case 3:
+				this.x_coord = (this.x_coord - numMove);
+				if(this.x_coord < 0)
+					this.x_coord = Params.world_width - numMove;
+				this.y_coord = (this.y_coord - numMove);
+				if(this.y_coord < 0)
+					this.y_coord = Params.world_height - numMove;
+				break;
+
+			case 4:
+				this.x_coord = (this.x_coord - numMove);
+				if(this.x_coord < 0)
+					this.x_coord = Params.world_width - numMove;
+				break;
+
+			case 5;
+				this.x_coord = (this.x_coord - numMove);
+				if(this.x_coord < 0)
+					this.x_coord = Params.world_width - numMove;
+				this.y_coord = (this.y_coord + numMove)%Params.world_height;
+				break;
+
+			case 6;
+				this.y_coord = (this.y_coord + numMove)%Params.world_height;
+				break;
+
+			case 7:
+				this.x_coord = (this.x_coord + numMove)%Params.world_width;
+				this.y_coord = (this.y_coord + numMove)%Params.world_height;
+				break;
+		}
+	}
+
+
+
+
 	protected final void walk(int direction) {
+		this.move(direction, 1);
 	}
 	
-	protected final void run(int direction) {:wq
+	protected final void run(int direction) {
+		this.move(direction, 2);
 		
 	}
 	
@@ -189,11 +247,31 @@ public abstract class Critter {
 	 * Clear the world of all critters, dead and alive
 	 */
 	public static void clearWorld() {
-		// Complete this method.
+		for(int i = 0; i < location.size(); i++) {
+			location.get(i).removeAll(location.get(i));
+		}
+		location.removeAll(location);
+
+		for(int i = 0; i < Params.world_height; i++) {
+			ArrayList<Critter> row = new ArrayList<Critter>();
+			for(int y = 0; y < Params.world_width; y++) {
+				row.add(null);
+			}
+			location.add(row);
+		}
+
 	}
 	
 	public static void worldTimeStep() {
-		// Complete this method.
+		for(Critter each: population){
+			each.doTimeStep();
+		}
+
+		for(int i = 0; i < babies.size(); i++) {
+			babies.get(i).doTimeStep();
+			population.add(babies.get(i));
+			babies.remove(i);
+		}
 	}
 	
 	public static void displayWorld() {
