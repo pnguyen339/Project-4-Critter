@@ -83,6 +83,7 @@ public class Main {
 				
 				switch (input.next()) {
 					case "quit":
+						if (input.hasNext()) throw new Exception();
 						return;
 						
 					case "show":
@@ -96,7 +97,7 @@ public class Main {
 						if (input.hasNext()) throw new Exception();
 						
 						for (int i = 0; i < optionalnumber; i++) {
-							// doTimeStep();	// TODO
+							Critter.worldTimeStep();
 						}
 						break;
 						
@@ -134,10 +135,14 @@ public class Main {
 			catch (Exception e) {
 				System.out.println("error processing: " + line);
 				
+				if (DEBUG) {
+					System.out.println("*** DEBUG: ERROR WAS " + e + " ***");
+				}
 			}
 			finally {
 				input.close();
 			}
 		}
 	}
+	
 }
