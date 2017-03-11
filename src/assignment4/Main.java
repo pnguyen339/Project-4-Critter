@@ -16,7 +16,7 @@ public class Main {
     private static String inputFile;	// input file, used instead of keyboard input if specified
     static ByteArrayOutputStream testOutputString;	// if test specified, holds all console output
     private static String myPackage;	// package of Critter file.  Critter cannot be in default pkg.
-    private static boolean DEBUG = false; // Use it or not, as you wish!
+    private static boolean DEBUG = true; // Use it or not, as you wish!
     static PrintStream old = System.out;	// if you want to restore output to console
 
 

@@ -243,6 +243,8 @@ public abstract class Critter {
 		Constructor<?> constructor = null;
 		Object instanceOfMyCritter = null;
 
+		critter_class_name = myPackage + "." + critter_class_name;
+
 		try {
 			myCritter = Class.forName(critter_class_name); 	// Class object of specified name
 		} catch (ClassNotFoundException e) {
@@ -424,6 +426,7 @@ public abstract class Critter {
 				
 				if (critters != null && critters.size() > 0) 
 					System.out.print(critters.get(0).toString());
+				else System.out.print(" ");
 			}
 			System.out.println("|");						// print the ending vertical line, and newline
 		}
