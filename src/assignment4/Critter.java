@@ -398,6 +398,14 @@ public abstract class Critter {
 	
 	private static void generateAlgae() {
 		// TODO Auto-generated method stub
+		Critter newAlg;
+		for(int i = 1; i <= Params.refresh_algae_count; i++) {
+			newAlg = (Critter) (new Algae());
+			newAlg.x_coord = Critter.getRandomInt(Params.world_width);
+			newAlg.y_coord = Critter.getRandomInt(Params.world_height);
+			newAlg.energy = Params.start_energy;
+			babies.add(newAlg);
+		}
 		
 	}
 
