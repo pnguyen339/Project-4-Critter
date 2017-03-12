@@ -215,11 +215,11 @@ public abstract class Critter {
 		int[] offset = offsetOf(direction);
 		offspring.x_coord = (offspring.x_coord + offset[0]) % Params.world_width;
 		while (offspring.x_coord < 0)
-			x_coord += Params.world_width;
+			offspring.x_coord += Params.world_width;
 		
 		offspring.y_coord = (offspring.y_coord + offset[1]) % Params.world_height;
 		while (offspring.y_coord < 0)
-			y_coord += Params.world_height;
+			offspring.y_coord += Params.world_height;
 		
 		offspring.energy = this.energy/2;
 		offspring.moved = false;
