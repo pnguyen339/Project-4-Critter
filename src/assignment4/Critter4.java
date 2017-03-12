@@ -17,6 +17,11 @@ public class Critter4 extends Critter {
 		if (Critter.getRandomInt(100) < move_prob) {
 			walk(dir);
 		}
+		
+		if (this.getEnergy() > Params.min_reproduce_energy) {
+			Critter4 child = new Critter4();
+			reproduce(child, (dir + 4) % 8);
+		}
 	}
 	
 	@Override
