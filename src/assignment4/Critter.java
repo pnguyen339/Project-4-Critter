@@ -162,7 +162,7 @@ public abstract class Critter {
 		
 		ArrayList<Integer> location = new ArrayList<Integer>();
 		location.add(ded.x_coord); location.add(ded.y_coord);
-		world.get(new int[] {ded.x_coord, ded.y_coord}).remove(ded);
+		world.get(location).remove(ded);
 	}
 	
 
@@ -173,10 +173,6 @@ public abstract class Critter {
 			this.energy -= Params.walk_energy_cost;
 			this.moved = true;
 		}
-		
-		if (this.energy <= 0) {
-			killCritter(this);
-		}
 	}
 	
 	protected final void run(int direction) {
@@ -185,10 +181,6 @@ public abstract class Critter {
 			this.move(direction, 2);
 			this.energy -= Params.run_energy_cost;
 			this.moved = true;
-		}		
-		
-		if (this.energy <= 0) {
-			killCritter(this);
 		}
 	}
 	
@@ -384,8 +376,16 @@ public abstract class Critter {
 	}
 	
 	public static void worldTimeStep() {
-		for(Critter each: population){
-			each.doTimeStep();
+		for(Iterator it = population.iterator(); it.hasNext();){
+			Critter critter = (Critter) it.next();
+			
+			if (critter.energy <= 0) {
+				it.remove();
+				
+				ArrayList<Integer> location = new ArrayList<Integer>();
+				location.add(critter.x_coord); location.add(critter.y_coord);
+				world.get(location).remove(critter);
+			}
 		}
 		
 		fightTime = true;

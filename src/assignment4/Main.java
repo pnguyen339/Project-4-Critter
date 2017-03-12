@@ -1,7 +1,6 @@
 package assignment4;
 
 
-import java.util.HashMap;
 import java.util.Scanner;
 import java.awt.List;
 import java.io.*;
