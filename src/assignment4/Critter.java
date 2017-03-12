@@ -105,7 +105,7 @@ public abstract class Critter {
 			ArrayList<Integer> posNew = new ArrayList<Integer>();
 			posNew.add(this.x_coord); posNew.add(this.y_coord);	// remember old position
 			
-			if(world.get(posNew).size() > 0) {
+			if(world.get(posNew) != null && world.get(posNew).size() > 0) {
 				this.x_coord = posOrig.get(0);
 				this.y_coord = posOrig.get(1);
 				return;
@@ -149,12 +149,20 @@ public abstract class Critter {
 	
 
 	private final static void fightCheck() {
-			for(ArrayList<Integer> loc : world.keySet()) {
-				ArrayList<Critter> fighters = world.get(loc);
-				while(fighters.size() > 1) {
-					battle(fighters.get(0), fighters.get(1));
-				}
+		ArrayList<ArrayList<Integer>> fights = new ArrayList<ArrayList<Integer>>();
+		
+		for (ArrayList<Integer> loc : world.keySet()) {
+			if (world.get(loc) != null && world.get(loc).size() > 1) {
+				fights.add(loc);
 			}
+		}
+		
+		for (ArrayList<Integer> loc : fights) {
+			while (world.get(loc) != null && world.get(loc).size() > 1) {
+				ArrayList<Critter> fighters = world.get(loc);
+				battle(fighters.get(0), fighters.get(1));
+			}
+		}
 	}
 	
 	private static void killCritter(Critter ded) {
@@ -378,6 +386,7 @@ public abstract class Critter {
 	public static void worldTimeStep() {
 		for(Iterator it = population.iterator(); it.hasNext();){
 			Critter critter = (Critter) it.next();
+			critter.doTimeStep();
 			
 			if (critter.energy <= 0) {
 				it.remove();

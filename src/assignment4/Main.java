@@ -2,7 +2,7 @@ package assignment4;
 
 
 import java.util.Scanner;
-import java.awt.List;
+import java.util.List;
 import java.io.*;
 import java.lang.reflect.Method;
 
@@ -127,8 +127,8 @@ public class Main {
 						
 						/* TODO debug this part */
 						Class<?> critterclass = Class.forName(myPackage + "." + crittertype);
-						Method stats = critterclass.getMethod("runStats", List.class);
-						stats.invoke(Critter.getInstances(crittertype));
+						Method stats = critterclass.getMethod("runStats", List.class);			// doesn't work!
+						stats.invoke(null, Critter.getInstances(crittertype));
 						break;
 						
 					default:
