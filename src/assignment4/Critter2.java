@@ -1,6 +1,5 @@
 package assignment4;
 
-import java.util.List;
 
 /* 
  * Critter2

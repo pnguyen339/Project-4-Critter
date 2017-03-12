@@ -14,7 +14,9 @@ public class Critter4 extends Critter {
 	
 	@Override
 	public void doTimeStep() {
-
+		if (Critter.getRandomInt(100) < move_prob) {
+			walk(dir);
+		}
 	}
 	
 	@Override

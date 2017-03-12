@@ -28,7 +28,7 @@ public abstract class Critter {
 	private	static List<Critter> population = new java.util.ArrayList<Critter>();
 	private static List<Critter> babies = new java.util.ArrayList<Critter>();
 	//protected static ArrayList<ArrayList<Critter>> location = new ArrayList<ArrayList<Critter>>();
-	protected static HashMap<int[], ArrayList<Critter>> world = new HashMap<int[], ArrayList<Critter>>();
+	protected static HashMap<ArrayList<Integer>, ArrayList<Critter>> world = new HashMap<ArrayList<Integer>, ArrayList<Critter>>();
 	
 	private boolean moved;
 	private static boolean fightTime = false;
@@ -89,7 +89,8 @@ public abstract class Critter {
 	
 	private final void move(int direction, int numMove) {
 		 
-		int[] posOrig = {this.x_coord, this.y_coord};	// remember current position
+		ArrayList<Integer> posOrig = new ArrayList<Integer>();
+		posOrig.add(this.x_coord); posOrig.add(this.y_coord);	// remember old position
 		
 		int[] offset = offsetOf(direction);				// find where the critter goes, in both x and y
 		this.x_coord = (this.x_coord + (numMove * offset[0])) % Params.world_width;
@@ -101,10 +102,12 @@ public abstract class Critter {
 			y_coord += Params.world_height;
 		
 		if(fightTime) {									// avoid collisions if in fight stage
-			int[] posNew = {this.x_coord, this.y_coord};
+			ArrayList<Integer> posNew = new ArrayList<Integer>();
+			posNew.add(this.x_coord); posNew.add(this.y_coord);	// remember old position
+			
 			if(world.get(posNew).size() > 0) {
-				this.x_coord = posOrig[0];
-				this.y_coord = posOrig[1];
+				this.x_coord = posOrig.get(0);
+				this.y_coord = posOrig.get(1);
 				return;
 			}
 		}
@@ -146,7 +149,7 @@ public abstract class Critter {
 	
 
 	private final static void fightCheck() {
-			for(int[] loc : world.keySet()) {
+			for(ArrayList<Integer> loc : world.keySet()) {
 				ArrayList<Critter> fighters = world.get(loc);
 				while(fighters.size() > 1) {
 					battle(fighters.get(0), fighters.get(1));
@@ -156,6 +159,9 @@ public abstract class Critter {
 	
 	private static void killCritter(Critter ded) {
 		population.remove(ded);
+		
+		ArrayList<Integer> location = new ArrayList<Integer>();
+		location.add(ded.x_coord); location.add(ded.y_coord);
 		world.get(new int[] {ded.x_coord, ded.y_coord}).remove(ded);
 	}
 	
@@ -187,7 +193,8 @@ public abstract class Critter {
 	}
 	
 	private final static void insertWorld(Critter critt) {
-		int[] loc = {critt.x_coord, critt.y_coord};
+		ArrayList<Integer> loc = new ArrayList<Integer>();
+		loc.add(critt.x_coord); loc.add(critt.y_coord);
 		ArrayList<Critter> crit;
 
 		if(world.containsKey(loc)) {
@@ -196,6 +203,7 @@ public abstract class Critter {
 		}
 		else {
 			crit = new ArrayList<Critter>();
+			crit.add(critt);
 			world.put(loc, crit);
 		}
 	}
@@ -263,6 +271,8 @@ public abstract class Critter {
 		me.y_coord = Critter.getRandomInt(Params.world_height);
 		me.energy = Params.start_energy;	
 		me.moved = false;
+		
+		population.add(me);
 		insertWorld(me);
 	}
 	
@@ -274,8 +284,7 @@ public abstract class Critter {
 	 */
 	public static List<Critter> getInstances(String critter_class_name) throws InvalidCritterException {
 		List<Critter> result = new java.util.ArrayList<Critter>();
-		
-		/* TODO debug this in particular */
+
 		for (Critter critter : population) {
 			if (critter.getClass().getSimpleName().equals(critter_class_name)) {
 				result.add(critter);
@@ -399,16 +408,14 @@ public abstract class Critter {
 	}
 	
 	private static void generateAlgae() {
-		// TODO Auto-generated method stub
 		Critter newAlg;
-		for(int i = 1; i <= Params.refresh_algae_count; i++) {
+		for(int i = 1; i <=Params.refresh_algae_count; i++) {
 			newAlg = (Critter) (new Algae());
 			newAlg.x_coord = Critter.getRandomInt(Params.world_width);
 			newAlg.y_coord = Critter.getRandomInt(Params.world_height);
 			newAlg.energy = Params.start_energy;
 			babies.add(newAlg);
 		}
-		
 	}
 
 	public static void displayWorld() {
@@ -422,7 +429,10 @@ public abstract class Critter {
 		for (int y = 0; y < Params.world_height; y++) {
 			System.out.print("|");							// print the vertical lines, then the row contents
 			for (int x = 0; x < Params.world_width; x++) {
-				ArrayList<Critter> critters = world.get(new int[] {x, y});
+				ArrayList<Integer> coord = new ArrayList<Integer>();
+				coord.add(x); coord.add(y);
+				
+				ArrayList<Critter> critters = world.get(coord);
 				
 				if (critters != null && critters.size() > 0) 
 					System.out.print(critters.get(0).toString());

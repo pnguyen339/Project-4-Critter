@@ -1,8 +1,11 @@
 package assignment4;
 
 
+import java.util.HashMap;
 import java.util.Scanner;
+import java.awt.List;
 import java.io.*;
+import java.lang.reflect.Method;
 
 
 /*
@@ -123,7 +126,10 @@ public class Main {
 						crittertype = input.next();
 						if (input.hasNext()) throw new Exception();
 						
-						// TODO everything
+						/* TODO debug this part */
+						Class<?> critterclass = Class.forName(myPackage + "." + crittertype);
+						Method stats = critterclass.getMethod("runStats", List.class);
+						stats.invoke(Critter.getInstances(crittertype));
 						break;
 						
 					default:
