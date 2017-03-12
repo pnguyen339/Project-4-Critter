@@ -145,7 +145,7 @@ public class Main {
 				}
 			}
 			finally {
-				//input.close();
+				input.close();
 			}
 		}
 	}
