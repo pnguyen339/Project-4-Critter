@@ -2,11 +2,11 @@ package assignment4;
 /* CRITTERS Critter.java
  * EE422C Project 4 submission by
  * Replace <...> with your actual data.
- * <Student1 Name>
- * <Student1 EID>
+ * Peter Nguyen
+ * ppn229
  * <Student1 5-digit Unique No.>
- * <Student2 Name>
- * <Student2 EID>
+ * Eric Wang
+ * efw345
  * <Student2 5-digit Unique No.>
  * Slip days used: <0>
  * Fall 2016
@@ -192,7 +192,7 @@ public abstract class Critter {
 		}
 	}
 	
-	private final static void insertWorld(Critter critt) {
+	protected final static void insertWorld(Critter critt) {
 		ArrayList<Integer> loc = new ArrayList<Integer>();
 		loc.add(critt.x_coord); loc.add(critt.y_coord);
 		ArrayList<Critter> crit;
@@ -331,18 +331,42 @@ public abstract class Critter {
 	static abstract class TestCritter extends Critter {
 		protected void setEnergy(int new_energy_value) {
 			super.energy = new_energy_value;
+			
 		}
 		
 		protected void setX_coord(int new_x_coord) {
+			ArrayList<Integer> posOrig = new ArrayList<Integer>();
+			posOrig.add(super.x_coord); posOrig.add(super.y_coord);
 			super.x_coord = new_x_coord;
+			if(world.get(posOrig).size() == 1) {			// if move is successful, remove from old place
+				world.remove(posOrig);
+			}
+			else {
+				world.get(posOrig).remove(this);
+			}
+			
+			super.insertWorld(this);								// add to new place
 		}
 		
 		protected void setY_coord(int new_y_coord) {
+			ArrayList<Integer> posOrig = new ArrayList<Integer>();
+			posOrig.add(super.x_coord); posOrig.add(super.y_coord);
+			
 			super.y_coord = new_y_coord;
+			
+			if(world.get(posOrig).size() == 1) {			// if move is successful, remove from old place
+				world.remove(posOrig);
+			}
+			else {
+				world.get(posOrig).remove(this);
+			}
+			
+			super.insertWorld(this);								// add to new place
 		}
 		
 		protected int getX_coord() {
 			return super.x_coord;
+			
 		}
 		
 		protected int getY_coord() {
@@ -375,6 +399,9 @@ public abstract class Critter {
 	 */
 	public static void clearWorld() {
 		world.clear();
+		population.clear();
+		babies.clear();
+		
 	}
 	
 	private static void resetMove() {
